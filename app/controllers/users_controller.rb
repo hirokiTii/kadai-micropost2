@@ -23,10 +23,15 @@ class UsersController < ApplicationController
       render :new
     end
   end
+  
+  def likes
+    @posts = current_user.list_favorites.page(params[:page]).per(20)
+  end
+  
+  private
+
+  def user_params
+    params.require(:user).permit(:name, :email, :password, :password_confirmation)
+  end
 end
 
-private
-
-def user_params
-  params.require(:user).permit(:name, :email, :password, :password_confirmation)
-end
