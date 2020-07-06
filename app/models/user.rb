@@ -15,6 +15,21 @@ class User < ApplicationRecord
 
     has_many :fav_posts, through: :favorites, source: :micropost
     
+    def follow(other_user)
+        unless self == other_user
+            self.relationships.find_or_create_by(follow_id: other_user.id)
+        end
+    end
+    
+    def unfollow(other_user)
+        rel = self.relationships.find_by(follow_id: other_user.id)
+        rel.destroy if rel
+    end
+    
+    def following?(other_user)
+        self.followings.include?(other_user)
+    end
+    
     def add_fav(post)
         self.favorites.find_or_create_by(micropost_id: post.id)
     end
@@ -29,6 +44,10 @@ class User < ApplicationRecord
     end
     
     def list_favorites
-       return Micropost.where(id: self.fav_post_ids)
+        return Micropost.where(id: self.fav_post_ids)
+    end
+    
+    def feed_microposts
+        Micropost.where(user_id: self.following_ids + [self.id])
     end
 end
